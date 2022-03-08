@@ -109,24 +109,30 @@ if (error)
 // continue with result
 ```
 
-# Final Notes
+### Making calls to exception throwing methods
 
-If you are using this library in your project, it does not mean that you can not use exceptions. Exceptions are still an effective way of quickly returning up the call stack when the application is in a serious erroneous state. This usage would be similar to `panic()` in Go.
+It is important to keep in mind that even if you are using this library throughout your entire application, external dependencies may not and exceptions could still be thrown when the call stack leaves your domain. Fallible includes a handy static factory method to wrap the call into a closure and have it catch any exceptions and convert them into an `Error` object.
 
-It is also important to keep in mind that even though you are using this library throughout your entire application, external dependencies may not and exceptions could still be thrown when the call stack leaves your domain.
+For example, `DateTime.Parse` can throw two exceptions: `FormatException` and `ArgumentNullException`. To intercept these exceptions and convert them into an `Error` object, you can do the following:
 
-I hope you enjoy using this library and find it an enjoyable addition to the C# coding experience.
+```c#
+var (result, error) = Fallible.Try(() => DateTime.Parse("1/1/2019"));
+```
 
-## Future Work
+## Final Notes
 
-### Error Handling
+If you are using this library in your project, it does not mean that you can not use exceptions. Exceptions are still an effective way of quickly returning up the call stack when the application is in a serious erroneous state. This usage would be similar to `panic()` in Go. I hope you enjoy using this library and find it an enjoyable addition to the C# coding experience.
+
+### Future Work
+
+#### Error Handling
 
 I am considering adding in utility classes to make it easier to handle error states and reduce the amount of boilerplate that the pattern creates. Although it is already minimal, some usages of the library may show the need for these classes.
 
-### Error Aggregation
+#### Error Aggregation
 
 While typically an application will exit early upon encountering an error state, it could sometimes be beneficial to continue processing and aggregate all the error states into a single error state. This could be useful for example if you are validating a series of values and you want to collect everything wrong about a particular call before exiting.
 
-### Extensions to the Standard Library
+#### Extensions to the Standard Library
 
 Adding extension methods to the standard library is a potential improvement for the library. For example, `bool Try(out value)` type methods could be extended to support `Fallible<T> Try()` signatures.
