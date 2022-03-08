@@ -21,12 +21,18 @@ public class Error : IEquatable<Error>
     }
 
     public static implicit operator bool(Error? error) => error is not default(Error);
-
+    
     public bool Equals(Error? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return _callingFilePath == other._callingFilePath && _callingMemberName == other._callingMemberName && _callingLineNumber == other._callingLineNumber;
+        return
+            _callingLineNumber == other._callingLineNumber
+            && Message == other.Message
+            && _callingMemberName == other._callingMemberName
+            && _callingFilePath == other._callingFilePath;
+
+
     }
 
     public override bool Equals(object? obj)
@@ -39,6 +45,6 @@ public class Error : IEquatable<Error>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(_callingFilePath, _callingMemberName, _callingLineNumber);
+        return HashCode.Combine(Message, _callingFilePath, _callingMemberName, _callingLineNumber);
     }
 }
