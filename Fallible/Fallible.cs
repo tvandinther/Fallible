@@ -1,7 +1,10 @@
 ﻿using System.Collections;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Fallible;
+
+#region Generic Struct
 
 public readonly record struct Fallible<T> : IStructuralEquatable, ITuple
 {
@@ -46,3 +49,25 @@ public readonly record struct Fallible<T> : IStructuralEquatable, ITuple
 
     public int Length => 2;
 }
+
+#endregion
+
+#region Static Class
+
+public static class Fallible
+{
+    public static Fallible<TResult> FromCall<TResult>(Func<TResult> action, [CallerArgumentExpression("action")] string expression = "")
+    {
+        try
+        {
+            var value = action();
+            return value;
+        }
+        catch (Exception e)
+        {
+            return new Error($"{expression} threw {e.GetType().Name}: {e.Message}");
+        }
+    }
+}
+
+#endregion
