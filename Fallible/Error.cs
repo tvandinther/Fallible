@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Fallible;
 
@@ -46,5 +47,14 @@ public class Error : IEquatable<Error>
     public override int GetHashCode()
     {
         return HashCode.Combine(Message, _callingFilePath, _callingMemberName, _callingLineNumber);
+    }
+
+    public override string ToString()
+    {
+        var stringBuilder = new StringBuilder();
+        stringBuilder.AppendLine(Message);
+        stringBuilder.AppendLine(StackTrace);
+
+        return stringBuilder.ToString();
     }
 }

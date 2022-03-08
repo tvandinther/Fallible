@@ -1,12 +1,11 @@
-﻿using Fallible;
-using Xunit;
+﻿using Xunit;
 
-namespace Errors.Tests;
+namespace Fallible.Tests;
 
 public class ErrorTests
 {
-    // Instantiation
-    
+    #region Instantiation Tests
+
     [Fact]
     public void WhenCreated_ShouldHaveMessage()
     {
@@ -26,7 +25,9 @@ public class ErrorTests
         Assert.Contains(expectedStackTraceSubstring, error.StackTrace);
     }
     
-    // Conversion
+    #endregion
+
+    #region Conversion Tests
 
     [Fact]
     public void WhenCreated_BoolConversion_ShouldReturnTrue()
@@ -44,8 +45,10 @@ public class ErrorTests
         Assert.False(error);
     }
 
-    // Equability
-    
+    #endregion
+
+    #region Equability Tests
+
     [Fact]
     public void WhenEquated_GivenSameInstance_ShouldReturnTrue()
     {
@@ -110,4 +113,32 @@ public class ErrorTests
         
         Assert.True(result);
     }
+
+    #endregion
+
+    #region ToString Tests
+
+    [Fact]
+    public void ToString_ContainsMessage()
+    {
+        var expectedSubstring = "Test";
+        var error = new Error(expectedSubstring);
+        
+        var result = error.ToString();
+        
+        Assert.Contains(expectedSubstring, result);
+    }
+    
+    [Fact]
+    public void ToString_ContainsStackTrace()
+    {
+        var expectedSubstring = "at Fallible.Error..ctor";
+        var error = new Error("Test");
+        
+        var result = error.ToString();
+        
+        Assert.Contains(expectedSubstring, result);
+    }
+
+    #endregion
 }

@@ -1,10 +1,12 @@
-﻿using Fallible;
+﻿using System;
 using Xunit;
 
-namespace Errors.Tests;
+namespace Fallible.Tests;
 
 public class FallibleTests
 {
+    #region Instantiation Tests
+
     [Fact]
     public void WhenCreated_ContainsError()
     {
@@ -36,6 +38,10 @@ public class FallibleTests
         Assert.Null(fallible.Value);
     }
 
+    #endregion
+
+    #region Deconstruction Tests
+
     [Fact]
     public void CanBeDeconstructed_ValueIsDefault()
     {
@@ -62,12 +68,17 @@ public class FallibleTests
     public void CanBeDeconstructed_ValueIsExpected()
     {
         var expectedValue = 42;
-        
-        var (value, _) = ReturnValue_ViaImplicitConversion(expectedValue);
+        Fallible<int> fallible = expectedValue;
+
+        var (value, _) = fallible;
         
         Assert.Equal(expectedValue, value);
     }
-    
+
+    #endregion
+
+    #region Conversion Tests
+
     [Fact]
     public void CanBeImplicitlyConverted_FromValue()
     {
@@ -112,8 +123,52 @@ public class FallibleTests
         Assert.IsType<Fallible<object>>(fallible);
     }
 
-    private static Fallible<T> ReturnValue_ViaImplicitConversion<T>(T value)
+    #endregion
+
+    #region Static Method Tests
+
+    [Fact]
+    public void FromCall_ShouldCatchException_AndReturnError()
     {
-        return value;
+        var func = (int arg) =>
+        {
+            if (arg == 42) throw new Exception();
+            return arg + 3;
+        };
+
+        var result = Fallible.Try(() => func(42));
+
+        Assert.NotNull(result.Error);
     }
+    
+    [Fact]
+    public void FromCall_ShouldReturnValue_WhenNoException()
+    {
+        var func = (int arg) =>
+        {
+            if (arg == 42) throw new Exception();
+            return arg + 3;
+        };
+
+        var (value, error) = Fallible.Try(() => func(41));
+
+        Assert.Null(error);
+        Assert.Equal(44, value);
+    }
+    
+    [Fact]
+    public void FromCall_ShouldHaveErrorMessage_ContainingExpression()
+    {
+        var func = (int arg) =>
+        {
+            if (arg == 42) throw new Exception();
+            return arg + 3;
+        };
+
+        var (_, error) = Fallible.Try(() => func(42));
+        
+        Assert.Contains("() => func(42)", error.Message);
+    }
+
+    #endregion
 }
