@@ -4,6 +4,17 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageVersion>0.1.1</PackageVersion>
+        <Title>Fallible</Title>
+        <Authors>Tom van Dinther</Authors>
+        <Description>An idiomatic way to explicitly define, propagate and handle error states in C#. This library is inspired by Go's errors.</Description>
+        <Copyright>Copyright (c) Tom van Dinther 2022</Copyright>
+        <PackageProjectUrl>https://github.com/tvandinther/Fallible</PackageProjectUrl>
+        <PackageLicense>https://raw.githubusercontent.com/tvandinther/Fallible/master/LICENSE</PackageLicense>
+        <RepositoryUrl>https://github.com/tvandinther/Fallible</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>errors, golang</PackageTags>
     </PropertyGroup>
 
 </Project>
