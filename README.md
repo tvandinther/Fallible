@@ -1,4 +1,4 @@
-﻿# Errors
+﻿# Fallible
 
 ##### Author: Tom van Dinther
 
