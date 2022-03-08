@@ -136,7 +136,7 @@ public class FallibleTests
             return arg + 3;
         };
 
-        var result = Fallible.FromCall(() => func(42));
+        var result = Fallible.Try(() => func(42));
 
         Assert.NotNull(result.Error);
     }
@@ -150,7 +150,7 @@ public class FallibleTests
             return arg + 3;
         };
 
-        var (value, error) = Fallible.FromCall(() => func(41));
+        var (value, error) = Fallible.Try(() => func(41));
 
         Assert.Null(error);
         Assert.Equal(44, value);
@@ -165,7 +165,7 @@ public class FallibleTests
             return arg + 3;
         };
 
-        var (_, error) = Fallible.FromCall(() => func(42));
+        var (_, error) = Fallible.Try(() => func(42));
         
         Assert.Contains("() => func(42)", error.Message);
     }

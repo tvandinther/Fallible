@@ -56,7 +56,7 @@ public readonly record struct Fallible<T> : IStructuralEquatable, ITuple
 
 public static class Fallible
 {
-    public static Fallible<TResult> FromCall<TResult>(Func<TResult> action, [CallerArgumentExpression("action")] string expression = "")
+    public static Fallible<TResult> Try<TResult>(Func<TResult> action, [CallerArgumentExpression("action")] string expression = "")
     {
         try
         {
