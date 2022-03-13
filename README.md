@@ -98,7 +98,7 @@ public Fallible<int> GetValue(int arg)
 
 #### Returning `void`
 
-Fallible includes a `void` type that can be used to return *void* from a method. It does not have an accessible constructor and can only be created by using the `Fallible.Return` property.
+Fallible includes a `Void` type that can be used to return *void* from a method. It does not have an accessible constructor and can only be created by using the `Fallible.Return` property.
 
 ```c#
 public Fallible<Void> DoSomething()
