@@ -4,8 +4,6 @@ using System.Text;
 
 namespace Fallible;
 
-#region Generic Struct
-
 public readonly record struct Fallible<T> : IStructuralEquatable, ITuple
 {
     public T Value { get; }
@@ -17,7 +15,11 @@ public readonly record struct Fallible<T> : IStructuralEquatable, ITuple
         Error = error;
     }
 
-    public static implicit operator Fallible<T>(Error error) => new(default!, error);
+    public static implicit operator Fallible<T>(Error error)
+    {
+        return new(default!, error);
+    }
+
     public static implicit operator Fallible<T>(T value) => new(value, default!);
     public static implicit operator Fallible<T>((T? value, Error? error) tuple) => new(tuple.value!, tuple.error!);
 
@@ -49,25 +51,3 @@ public readonly record struct Fallible<T> : IStructuralEquatable, ITuple
 
     public int Length => 2;
 }
-
-#endregion
-
-#region Static Class
-
-public static class Fallible
-{
-    public static Fallible<TResult> Try<TResult>(Func<TResult> action, [CallerArgumentExpression("action")] string expression = "")
-    {
-        try
-        {
-            var value = action();
-            return value;
-        }
-        catch (Exception e)
-        {
-            return new Error($"{expression} threw {e.GetType().Name}: {e.Message}");
-        }
-    }
-}
-
-#endregion

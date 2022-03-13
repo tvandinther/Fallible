@@ -16,7 +16,7 @@ public class FallibleTests
         
         Assert.Equal(error, fallible.Error);
     }
-    
+
     [Fact]
     public void WhenCreated_ContainsDefaultValue_WhenValueType()
     {
@@ -75,6 +75,16 @@ public class FallibleTests
         Assert.Equal(expectedValue, value);
     }
 
+    [Fact]
+    public void CanBeDeconstructed_ShouldHaveNullResult_WhenVoidReturn()
+    {
+        Fallible<Void> fallible = new Error("Wrong Number");
+        
+        var (result, _) = fallible;
+        
+        Assert.Null(result);
+    }
+
     #endregion
 
     #region Conversion Tests
@@ -121,6 +131,17 @@ public class FallibleTests
         Fallible<object> fallible = (null, error);
         
         Assert.IsType<Fallible<object>>(fallible);
+    }
+
+    [Fact]
+    public void CanBeImplicitlyConverted_FromVoid_WhenReturning()
+    {
+        var func = Fallible<Void>() => Fallible.Return;
+
+        Fallible<Void> fallible = func();
+        
+        Assert.IsType<Fallible<Void>>(fallible);
+
     }
 
     #endregion
