@@ -96,6 +96,20 @@ public Fallible<int> GetValue(int arg)
 }
 ```
 
+#### Returning `void`
+
+Fallible includes a `void` type that can be used to return *void* from a method. It does not have an accessible constructor and can only be created by using the `Fallible.Return` property.
+
+```c#
+public Fallible<Void> DoSomething()
+{
+    // Do something
+    if (somethingFailed) return new Error("Something went wrong");
+    
+    return Fallible.Return;
+}
+```
+
 ### Working with `Fallible<T>`
 
 When working with a `Fallible<T>` type returned by a method, it is best to deconstruct it upon assignment and then perform a check on the error state. `Error` contains an implicit boolean conversion operator that returns `true` if the error state is not `null`.
