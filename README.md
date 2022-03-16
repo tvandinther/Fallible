@@ -133,6 +133,46 @@ For example, `DateTime.Parse` can throw two exceptions: `FormatException` and `A
 var (result, error) = Fallible.Try(() => DateTime.Parse("1/1/2019"));
 ```
 
+### Chaining error messages
+
+When dealing with an `Error` object, often you may want to pass the error up the call stack. As it is passed up the call stack, the level of abstraction is increased which can give increasing context to the error message. To facilitate this best practice, the `Error` object allows string concatenation with itself.
+
+```c#
+Fallible<User> GetUserFromDB(UserId id)
+{
+    if (!databaseIsConnected) return new Error("Database is not connected");
+    ...
+}
+
+Fallible<User> FindUserById(UserId id)
+{
+    var (user, error) = GetUserFromDB(id);
+    if (error) return "Could not find user: " + error;
+    
+    return user;
+}
+
+var (user, error) = FindUserById(id);
+if (error)
+{
+    Console.WriteLine(error); // "Could not find user: Database is not connected"
+}
+```
+
+Messages can also be appended by putting the string on the right hand side of the `+` operator.
+
+```c#
+return error + ": Could not find user";
+```
+
+#### Error message formatting
+
+To ensure that error messages are not accidentally overwritten, directly setting the `Error.Message` property is not possible. If appending or prepending from the error message is not suitable, you can use the `Error.Format` method to format the message more comprehensively. This method functions exactly like the `string.Format` method and uses that in its implementation.
+
+```c#
+return error.Format("Could not find user: {0}: Aborting...", error.Message);
+```
+
 ## Final Notes
 
 If you are using this library in your project, it does not mean that you can not use exceptions. Exceptions are still an effective way of quickly returning up the call stack when the application is in a serious erroneous state. This usage would be similar to `panic()` in Go. I hope you enjoy using this library and find it an enjoyable addition to the C# coding experience.

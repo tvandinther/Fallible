@@ -5,7 +5,7 @@ namespace Fallible;
 
 public class Error : IEquatable<Error>
 {
-    public readonly string Message;
+    public string Message { get; private set; }
     public readonly string StackTrace;
     private readonly string _callingFilePath;
     private readonly string _callingMemberName;
@@ -22,7 +22,23 @@ public class Error : IEquatable<Error>
     }
 
     public static implicit operator bool(Error? error) => error is not default(Error);
+    public static Error operator +(string message, Error error)
+    {
+        error.Message = string.Concat(message, error.Message);
+        return error;
+    }
     
+    public static Error operator +(Error error, string message)
+    {
+        error.Message = string.Concat(error.Message, message);
+        return error;
+    }
+
+    public void Format(string format, params object[] args)
+    {
+        Message = string.Format(format, args);
+    }
+
     public bool Equals(Error? other)
     {
         if (ReferenceEquals(null, other)) return false;
