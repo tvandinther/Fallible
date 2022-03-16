@@ -141,4 +141,41 @@ public class ErrorTests
     }
 
     #endregion
+
+    #region Message Tests
+
+    [Fact]
+    public void Format_CorrectlyFormatsMessage()
+    {
+        const string expected = "test :test: test";
+        var error = new Error("test");
+        
+        error.Format("test :{0}: test", error.Message);
+        
+        Assert.Equal(expected, error.Message);
+    }
+    
+    [Fact]
+    public void AdditionOperator_CorrectlyPrependsString_WhenStringOnLHS()
+    {
+        const string expected = "test: appended";
+        var error = new Error("test");
+        
+        error += ": appended";
+        
+        Assert.Equal(expected, error.Message);
+    }
+
+    [Fact]
+    public void AdditionOperator_CorrectlyAppendsString_WhenStringOnRHS()
+    {
+        const string expected = "prepended: test";
+        var error = new Error("test");
+        
+        error = "prepended: " + error;
+        
+        Assert.Equal(expected, error.Message);
+    }
+
+    #endregion
 }
