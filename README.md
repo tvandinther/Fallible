@@ -70,11 +70,7 @@ Although, if the error's message was constructed using dynamic arguments, the er
 
 ### `Fallible<T>`
 
-`Fallible<T>` is a readonly record struct meaning that it is immutable, is identified by its properties and is allocated on the stack. It can not be created directly. To create a `Fallible<T>` object you can cast either explicitly or implicitly from one of the following three types.
-
-- `T`
-- `Error`
-- `(T?, Error?)`
+`Fallible<T>` is a readonly record struct meaning that it is immutable, is identified by its properties and is allocated on the stack. It can not be created directly. To create a `Fallible<T>` object you can cast either explicitly or implicitly from `T` or `Error`. Using a cast from only these two types as the only way to create a `Fallible<T>` object ensures that we always have either an error or a value.
 
 This gives the succinct interface for the creation of a `Fallible<T>` object as per the examples below.
 
@@ -84,15 +80,6 @@ public Fallible<int> GetValue(int arg)
     if (arg == 42) return new Error("Can't work with 42");
     
     return arg + 3;
-}
-```
-or
-```c#
-public Fallible<int> GetValue(int arg)
-{
-    if (arg == 42) return (default, new Error("Can't work with 42"));
-    
-    return (arg + 3, null);
 }
 ```
 
@@ -122,6 +109,10 @@ if (error)
 }
 // continue with result
 ```
+
+#### Implicit Unwrapping
+
+You may want to use the `Fallible<T>` type in a wrapper function. If the wrapped function also returns a `Fallible<T>` type, an implicit conversion will automatically unwrap `Fallible<Fallible<T>>` into `Fallible<T>`.
 
 ### Making calls to exception throwing methods
 
