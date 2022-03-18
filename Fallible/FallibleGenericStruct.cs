@@ -15,13 +15,9 @@ public readonly record struct Fallible<T> : IStructuralEquatable, ITuple
         Error = error;
     }
 
-    public static implicit operator Fallible<T>(Error error)
-    {
-        return new(default!, error);
-    }
-
+    public static implicit operator Fallible<T>(Error error) => new(default!, error);
     public static implicit operator Fallible<T>(T value) => new(value, default!);
-    public static implicit operator Fallible<T>((T? value, Error? error) tuple) => new(tuple.value!, tuple.error!);
+    public static implicit operator Fallible<T>(Fallible<Fallible<T>> outer) => outer.Error ? outer.Error : outer.Value;
 
     public void Deconstruct(out T value, out Error error)
     {

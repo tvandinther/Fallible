@@ -104,34 +104,6 @@ public class FallibleTests
         
         Assert.IsType<Fallible<int>>(fallible);
     }
-    
-    [Fact]
-    public void CanBeImplicitlyConverted_FromTuple_WhenErrorIsNull()
-    {
-        Fallible<int> fallible = (42, null);
-        
-        Assert.IsType<Fallible<int>>(fallible);
-    }
-    
-    [Fact]
-    public void CanBeImplicitlyConverted_FromTuple_WhenValueIsDefault()
-    {
-        var error = new Error("Wrong Number");
-        
-        Fallible<int> fallible = (default, error);
-        
-        Assert.IsType<Fallible<int>>(fallible);
-    }
-    
-    [Fact]
-    public void CanBeImplicitlyConverted_FromTuple_WhenValueIsNull()
-    {
-        var error = new Error("Wrong Number");
-        
-        Fallible<object> fallible = (null, error);
-        
-        Assert.IsType<Fallible<object>>(fallible);
-    }
 
     [Fact]
     public void CanBeImplicitlyConverted_FromVoid_WhenReturning()
@@ -142,6 +114,52 @@ public class FallibleTests
         
         Assert.IsType<Fallible<Void>>(fallible);
 
+    }
+    
+    [Fact]
+    public void WhenWrapped_ShouldUnwrapItselfImplicitly()
+    {
+        Fallible<int> inner = 42;
+        Fallible<Fallible<int>> outer = inner;
+        
+        Fallible<int> result = outer;
+
+        Assert.IsType<Fallible<int>>(result);
+    }
+    
+    [Fact]
+    public void WhenImplicitlyUnwrapped_ShouldContainInnerValue()
+    {
+        const int expectedValue = 42;
+        Fallible<int> inner = expectedValue;
+        Fallible<Fallible<int>> outer = inner;
+        
+        Fallible<int> result = outer;
+
+        Assert.Equal(expectedValue, result.Value);
+    }
+
+    [Fact]
+    public void WhenImplicitlyUnwrapped_ShouldContainCorrectError_WhenInnerErrorIsPresent()
+    {
+        var expectedError = new Error("Inner Error");
+        Fallible<int> inner = expectedError;
+        Fallible<Fallible<int>> outer = inner;
+        
+        Fallible<int> result = outer;
+
+        Assert.Equal(expectedError, result.Error);
+    }
+
+    [Fact]
+    public void WhenImplicitlyUnwrapped_ShouldContainError_WhenOuterErrorIsPresent()
+    {
+        var expectedError = new Error("Outer Error");
+        Fallible<Fallible<int>> outer = expectedError;
+        
+        Fallible<int> result = outer;
+
+        Assert.Equal(expectedError, result.Error);
     }
 
     #endregion
