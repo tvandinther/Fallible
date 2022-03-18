@@ -1,4 +1,4 @@
-namespace Fallible;
+namespace FallibleTypes;
 
 public class Void
 {

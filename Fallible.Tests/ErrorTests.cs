@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace Fallible.Tests;
+namespace FallibleTypes.Tests;
 
 public class ErrorTests
 {
@@ -18,7 +18,7 @@ public class ErrorTests
     [Fact]
     public void WhenCreated_ShouldHaveStackTrace()
     {
-        var expectedStackTraceSubstring = "at Fallible.Error..ctor";
+        var expectedStackTraceSubstring = "at FallibleTypes.Error..ctor";
         
         var error = new Error("Test");
 
@@ -132,7 +132,7 @@ public class ErrorTests
     [Fact]
     public void ToString_ContainsStackTrace()
     {
-        var expectedSubstring = "at Fallible.Error..ctor";
+        var expectedSubstring = "at FallibleTypes.Error..ctor";
         var error = new Error("Test");
         
         var result = error.ToString();

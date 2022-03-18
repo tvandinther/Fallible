@@ -1,7 +1,7 @@
 ﻿using System;
 using Xunit;
 
-namespace Fallible.Tests;
+namespace FallibleTypes.Tests;
 
 public class FallibleTests
 {

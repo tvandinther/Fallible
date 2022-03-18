@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Fallible;
+namespace FallibleTypes;
 
 public class Error : IEquatable<Error>
 {

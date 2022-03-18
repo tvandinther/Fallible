@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace Fallible;
+namespace FallibleTypes;
 
 public static class Fallible
 {
