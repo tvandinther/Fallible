@@ -1,5 +1,11 @@
 ﻿# Fallible
 
+[![Tests](https://github.com/tvandinther/fallible/actions/workflows/test.yml/badge.svg)](https://www.github.com/tvandinther/fallible)
+[![Nuget](https://img.shields.io/nuget/v/Fallible?color=blue)](https://www.nuget.org/packages/Fallible/)
+[![Nuget](https://img.shields.io/nuget/dt/Fallible)](https://www.nuget.org/packages/Fallible/)
+[![.NET](https://img.shields.io/badge/.NET-6.0-blue)](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+[![GitHub](https://img.shields.io/github/license/tvandinther/fallible?color=lightgrey)](https://github.com/tvandinther/Fallible/blob/master/LICENSE)
+
 ##### Author: Tom van Dinther
 
 An idiomatic way to explicitly define, propagate and handle error states in C#. This library is inspired by Go's [errors](https://gobyexample.com/errors).
