@@ -210,4 +210,165 @@ public class FallibleTests
     }
 
     #endregion
+
+    #region Fluent Errors Tests
+
+    [Fact]
+    public void Try_ReturnsValue_WhenOperationSucceeds()
+    {
+        const int expectedValue = 42;
+        
+        var (value, _) = Fallible.Try(() => FallibleOperation(expectedValue, false));
+        
+        Assert.Equal(expectedValue, value);
+    }
+
+    [Fact]
+    public void Try_ReturnsError_WhenOperationFails()
+    {
+        var (_, error) = Fallible.Try(() => FallibleOperation(42, true));
+        
+        Assert.NotNull(error);
+    }
+    
+    [Fact]
+    public void Try_PrependsErrorMessage_WhenOperationFails()
+    {
+        const string expectedStartString = "Test Error: ";
+        
+        var (_, error) = Fallible.Try(() => FallibleOperation(42, true), expectedStartString);
+        
+        Assert.StartsWith(expectedStartString, error.Message);
+    }
+    
+    [Fact]
+    public void Then_ReturnsValue_WhenOperationSucceeds()
+    {
+        const int expectedValue = 42;
+        
+        var result = FallibleOperation(expectedValue, false)
+            .Then(value => value + 3);
+        
+        Assert.Equal(45, result);
+    }
+    
+    [Fact]
+    public void Then_ReturnsError_WhenOperationFails()
+    {
+        var result = FallibleOperation(42, true)
+            .Then(value => value + 3);
+        
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public void OnFail_ReturnsPassesThroughFallible_WhenOperationSucceeds_ErrorReturningOnFail()
+    {
+        const int expectedValue = 42;
+        
+        var result = Fallible.Try(() => FallibleOperation(expectedValue, false))
+            .OnFail(error => error);
+        
+        Assert.Equal(expectedValue, result.Value);
+    }
+    
+    [Fact]
+    public void OnFail_ReturnsPassesThroughFallible_WhenOperationSucceeds_TransparentOnFail()
+    {
+        const int expectedValue = 42;
+        
+        var result = Fallible.Try(() => FallibleOperation(expectedValue, false))
+            .OnFail(_ => {});
+        
+        Assert.Equal(expectedValue, result.Value);
+    }
+    
+    [Fact]
+    public void OnFail_ReturnsModifiedError_WhenOperationFails_ErrorReturningOnFail()
+    {
+        const string expectedStartString = "Test Error: ";
+        
+        var result = Fallible.Try(() => FallibleOperation(42, true))
+            .OnFail(error => expectedStartString + error);
+        
+        Assert.StartsWith(expectedStartString, result.Error.Message);
+    }
+    
+    [Fact]
+    public void OnFail_ReturnsPassesThroughFallible_WhenOperationFails_TransparentOnFail()
+    {
+        var result = Fallible.Try(() => FallibleOperation(42, true))
+            .OnFail(_ => { });
+        
+        Assert.NotNull(result.Error);
+    }
+    
+    [Fact]
+    public void OnFail_CallsOnFailFunc_WhenOperationFails_TransparentOnFail()
+    {
+        var callCount = 0;
+
+        Fallible.Try(() => FallibleOperation(42, true))
+            .OnFail(_ => callCount++);
+        
+        Assert.Equal(1, callCount);
+    }
+    
+    [Fact]
+    public void OnFail_ReturnsError_WhenOperationFails_ErrorReturningOnFail()
+    {
+        var (_, error) = Fallible.Try(() => FallibleOperation(42, true)).OnFail(e => e);
+        
+        Assert.NotNull(error);
+    }
+    
+    [Fact]
+    public void OnFail_ReturnsError_WhenOperationFails_TransparentOnFail()
+    {
+        var (_, error) = Fallible.Try(() => FallibleOperation(42, true)).OnFail(_ => { });
+        
+        Assert.NotNull(error);
+    }
+
+    [Fact]
+    public void CanChainFluently_Succeeds()
+    {
+        var result = FallibleOperation(42, false)
+            .Then(value => value + 3)
+            .OnFail(error => error);
+        
+        Assert.Equal(45, result.Value);
+    }
+    
+    [Fact]
+    public void CanChainFluently_Fails()
+    {
+        var callCount = 0;
+        
+        var result = FallibleOperation(42, false)
+            .Then(value => FallibleOperation(value + 3, true))
+            .OnFail(_ => callCount++);
+        
+        Assert.Equal(1, callCount);
+    }
+    
+    [Fact]
+    public void CanChainFluently_Fails_DoesNotExecuteThen()
+    {
+        var thenCallCount = 0;
+
+        FallibleOperation(42, false)
+            .Then(value => FallibleOperation(value + 3, true))
+            .Then(_ => thenCallCount++);
+        
+        Assert.Equal(0, thenCallCount);
+    }
+
+    private Fallible<T> FallibleOperation<T>(T expectedValue, bool fail)
+    {
+        if (fail) return new Error("Operation Failed");
+        return expectedValue;
+    }
+
+    #endregion
 }

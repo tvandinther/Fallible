@@ -130,7 +130,7 @@ For example, `DateTime.Parse` can throw two exceptions: `FormatException` and `A
 var (result, error) = Fallible.Try(() => DateTime.Parse("1/1/2019"));
 ```
 
-### Chaining error messages
+### Concatenating error messages
 
 When dealing with an `Error` object, often you may want to pass the error up the call stack. As it is passed up the call stack, the level of abstraction is increased which can give increasing context to the error message. To facilitate this best practice, the `Error` object allows string concatenation with itself.
 
@@ -170,15 +170,64 @@ To ensure that error messages are not accidentally overwritten, directly setting
 return error.Format("Could not find user: {0}: Aborting...", error.Message);
 ```
 
+### Fluent Error Handling
+
+You can use functional chaining to handle errors in a more declarative way. For example, the following code will get the user using the method with the declared signature and pass it into the next method if successful or return an `Error` object if the user is not found:
+
+```c#
+public Fallible<User> GetUserFromDB(UserId id);
+
+return GetUserFromDB(userId).Then(user => {
+    // Do something with user
+});
+```
+
+This code is equivalent to the following:
+
+```c#
+public Fallible<User> GetUserFromDB(UserId id);
+
+var (user, error) = GetUserFromDB(userId);
+if (error) return error;
+
+// Do something with user
+```
+
+You can chain multiple `Then` calls but if any of them result in a failed state, then the entire chain will fail. You can add a call to `OnFail` in the middle of the chain to handle errors.
+
+```c#
+public Fallible<User> GetUserFromDB(UserId id);
+
+return GetUserFromDB(userId).Then(user => {
+    // Do something with user
+}).OnFail(error => {
+    // Handle error
+});
+```
+
+Multiple calls to `OnFail` can be chained together with each of them executing in turn if the chain is in a failed state.
+
+Simply stated, `Then` and `OnFail` can be chained together as many times as necessary. When a `Then` expression is successful, the value of `Fallible<T>` is passed into the next `Then` expression. In this scenario, the chain is in a succeeded state and will not execute any expressions chained by `OnFail`. Once a `Then` expression fails, the chain will be in a failed state and any `OnFail` expressions will then be executed and finally return, skipping over `Then` expressions.
+
+The object returned from the chain will be `Fallible<T>` where `T` is the type of the value returned by the last `Then` expression.
+
+#### Try
+
+You can use the `Try` static method to wrap a call to a method that returns `Fallible<T>`. You can optionally add an error message as a parameter to the `Try` method. This will be prepend to the error message should the tried expression fail.
+
+```c#
+public Fallible<User> GetUserFromDB(UserId id);
+
+var (user, error) = Fallible.Try(() => GetUserFromDB(userId), "Could not find user: ");
+
+Console.WriteLine(error); // "Could not find user: Database is not connected"
+```
+
 ## Final Notes
 
 If you are using this library in your project, it does not mean that you can not use exceptions. Exceptions are still an effective way of quickly returning up the call stack when the application is in a serious erroneous state. This usage would be similar to `panic()` in Go. I hope you enjoy using this library and find it an enjoyable addition to the C# coding experience.
 
 ### Future Work
-
-#### Error Handling
-
-I am considering adding in utility classes to make it easier to handle error states and reduce the amount of boilerplate that the pattern creates. Although it is already minimal, some usages of the library may show the need for these classes.
 
 #### Error Aggregation
 
@@ -186,4 +235,4 @@ While typically an application will exit early upon encountering an error state,
 
 #### Extensions to the Standard Library
 
-Adding extension methods to the standard library is a potential improvement for the library. For example, `bool Try(out value)` type methods could be extended to support `Fallible<T> Try()` signatures.
+I would like to add several proxy classes to encapsulate standard library functions with `Fallible<T>` return types where exceptions would otherwise be thrown. I will start with `System.Collections.Generic` as this is frequently used.
