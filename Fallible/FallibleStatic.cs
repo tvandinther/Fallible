@@ -59,10 +59,10 @@ public static class Fallible
     /// <typeparam name="TResult">The type of the fallible being returned.</typeparam>
     /// <returns>A fallible result.</returns>
     /// <remarks>If any of the operations fail, the chain stays in an error state.</remarks>
-    public static Fallible<TResult> Then<TIn, TResult>(this Fallible<TIn> fallible, Func<TIn, TResult> then, string errorMessage = "")
+    public static Fallible<TResult> Then<TIn, TResult>(this Fallible<TIn> fallible, Func<TIn, TResult> then)
     {
         var (value, error) = fallible;
-        if (error) return errorMessage + error;
+        if (error) return error;
     
         return then(value);
     }
@@ -77,10 +77,10 @@ public static class Fallible
     /// <typeparam name="TResult">The type of the fallible being returned.</typeparam>
     /// <returns>A fallible result.</returns>
     /// <remarks>If any of the operations fail, the chain stays in an error state.</remarks>
-    public static Fallible<TResult> Then<TIn, TResult>(this Fallible<TIn> fallible, Func<TIn, Fallible<TResult>> then, string errorMessage = "")
+    public static Fallible<TResult> Then<TIn, TResult>(this Fallible<TIn> fallible, Func<TIn, Fallible<TResult>> then)
     {
         var (value, error) = fallible;
-        if (error) return errorMessage + error;
+        if (error) return error;
 
         return then(value);
     }

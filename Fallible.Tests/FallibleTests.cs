@@ -260,18 +260,7 @@ public class FallibleTests
         
         Assert.NotNull(result.Error);
     }
-    
-    [Fact]
-    public void Then_PrependsErrorMessage_WhenOperationFails()
-    {
-        const string expectedStartString = "Test Error: ";
-        
-        var result = FallibleOperation(42, true)
-            .Then(value => value + 3, expectedStartString);
-        
-        Assert.StartsWith(expectedStartString, result.Error.Message);
-    }
-    
+
     [Fact]
     public void OnFail_ReturnsPassesThroughFallible_WhenOperationSucceeds_ErrorReturningOnFail()
     {
