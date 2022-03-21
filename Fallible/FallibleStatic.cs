@@ -94,7 +94,7 @@ public static class Fallible
     /// <typeparam name="TIn">The type of the fallible being chained.</typeparam>
     /// <returns>The original fallible result.</returns>
     /// <remarks>This will propagate a modified error object. Useful for modifying error messages.</remarks>
-    public static Fallible<TIn> OnFail<TIn>(this Fallible<TIn> fallible, Func<Error, Error> onFail)
+    public static Fallible<TIn> OnFail<TIn>(this Fallible<TIn> fallible, Func<Error, Fallible<TIn>> onFail)
     {
         var (_, error) = fallible;
         return error ? onFail(error) : fallible;

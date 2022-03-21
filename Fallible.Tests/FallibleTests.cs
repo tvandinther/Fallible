@@ -363,7 +363,22 @@ public class FallibleTests
         
         Assert.Equal(0, thenCallCount);
     }
-
+    
+    [Fact]
+    public void CanChainNested_WhenOnFail()
+    {
+        const int expectedValue = 42;
+        
+        var (result, _) = FallibleOperation(0, true)
+            .Then(value => value + 1)
+            .OnFail(_ => 
+                FallibleOperation(expectedValue, false)
+                    .Then(_ => expectedValue + 1)
+                    .OnFail(error => "Could not get players: " + error));
+        
+        Assert.Equal(expectedValue + 1, result);
+    }
+    
     private Fallible<T> FallibleOperation<T>(T expectedValue, bool fail)
     {
         if (fail) return new Error("Operation Failed");
