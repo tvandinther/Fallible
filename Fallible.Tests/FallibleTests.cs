@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace FallibleTypes.Tests;
@@ -357,9 +360,8 @@ public class FallibleTests
     {
         var thenCallCount = 0;
 
-        FallibleOperation(42, false)
-            .Then(value => FallibleOperation(value + 3, true))
-            .Then(_ => thenCallCount++);
+        FallibleOperation(42, true)
+            .Then(_ => FallibleOperation(thenCallCount++, true));
         
         Assert.Equal(0, thenCallCount);
     }
@@ -383,6 +385,30 @@ public class FallibleTests
     {
         if (fail) return new Error("Operation Failed");
         return expectedValue;
+    }
+
+    #endregion
+
+    #region Covariance and Contravariance
+
+    [Fact]
+    public void ToCovariant_ResolvesCovariantAssignment()
+    {
+        Fallible<List<int>> fallible = new List<int> { 42 };
+        
+        Fallible<IEnumerable<int>> covariant = fallible.ToCovariant<List<int>, IEnumerable<int>>();
+
+        Assert.IsAssignableFrom<List<int>>(covariant.Value);
+    }
+    
+    [Fact]
+    public void ToContravariant_ResolvesContravariantAssignment()
+    {
+        Fallible<IEnumerable<int>> fallible = new List<int> { 42 };
+        
+        Fallible<List<int>> contravariant = fallible.ToContravariant<IEnumerable<int>, List<int>>();
+
+        Assert.IsAssignableFrom<IEnumerable<int>>(contravariant.Value);
     }
 
     #endregion

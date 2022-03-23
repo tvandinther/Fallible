@@ -9,7 +9,7 @@ namespace FallibleTypes;
 /// </summary>
 /// <typeparam name="T">The return type.</typeparam>
 /// <remarks><see cref="Fallible{T}"/> will only ever be in a succeeded state or a failed state.</remarks>
-public readonly record struct Fallible<T> : IStructuralEquatable, ITuple
+public readonly record struct Fallible<T> : IStructuralEquatable
 {
     /// <summary>
     /// The value.
@@ -73,14 +73,4 @@ public readonly record struct Fallible<T> : IStructuralEquatable, ITuple
             comparer.GetHashCode(Value!), 
             comparer.GetHashCode(Error));
     }
-
-    public object? this[int index] => 
-        index switch
-        {
-            0 => Value,
-            1 => Error,
-            _ => throw new IndexOutOfRangeException()
-        };
-
-    public int Length => 2;
 }
