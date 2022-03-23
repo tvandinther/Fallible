@@ -223,6 +223,26 @@ var (user, error) = Fallible.Try(() => GetUserFromDB(userId), "Could not find us
 Console.WriteLine(error); // "Could not find user: Database is not connected"
 ```
 
+### Handling Covariance and Contravariance
+
+#### Covariance
+
+To convert a `Fallible<T>` to a `Fallible<U>` where `T` is a subtype of `U`, you can use the `ToCovariant` method. This method will return a `Fallible<U>` where the value of `Fallible<U>` is the value of `Fallible<T>` converted to `U`. E.g. `Fallible<List<int>>` to `Fallible<IEnumerable<int>>`.
+
+```c#
+Fallible<List<int>> fallible = new List<int> { 42 };
+Fallible<IEnumerable<int>> covariant = fallible.ToCovariant<List<int>, IEnumerable<int>>();
+```
+
+#### Contravariance
+
+To convert a `Fallible<U>` to a `Fallible<T>` where `T` is a subtype of `U`, you can use the `ToContravariant` method. This method will return a `Fallible<T>` where the value of `Fallible<T>` is the value of `Fallible<U>` converted to `T`. E.g. `Fallible<IEnumerable<int>>` to `Fallible<List<int>>`.
+
+```c#
+Fallible<IEnumerable<int>> fallible = new List<int> { 42 };
+Fallible<List<int>> contravariant = fallible.ToContravariant<IEnumerable<int>, List<int>>();
+```
+
 ## Final Notes
 
 If you are using this library in your project, it does not mean that you can not use exceptions. Exceptions are still an effective way of quickly returning up the call stack when the application is in a serious erroneous state. This usage would be similar to `panic()` in Go. I hope you enjoy using this library and find it an enjoyable addition to the C# coding experience.
