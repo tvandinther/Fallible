@@ -1,4 +1,4 @@
-﻿# Fallible
+﻿﻿# Fallible
 
 [![Tests](https://github.com/tvandinther/fallible/actions/workflows/test.yml/badge.svg)](https://www.github.com/tvandinther/fallible)
 [![Nuget](https://img.shields.io/nuget/v/Fallible?color=blue)](https://www.nuget.org/packages/Fallible/)
@@ -6,7 +6,7 @@
 [![.NET](https://img.shields.io/badge/.NET-6.0-blue)](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
 [![GitHub](https://img.shields.io/github/license/tvandinther/fallible?color=lightgrey)](https://github.com/tvandinther/Fallible/blob/master/LICENSE)
 
-##### Author: Tom van Dinther
+**Author: Tom van Dinther**
 
 An idiomatic way to explicitly define, propagate and handle error states in C#. This library is inspired by Go's [errors](https://gobyexample.com/errors).
 
@@ -14,7 +14,7 @@ The purpose of this library is to support the usage of a new pattern of error pr
 
 The benefit of this approach is that it enforces a higher level of care in the code that consumes services and methods which can introduce error state into an application. Errors can either be handled by the caller or be passed up the stack explicitly.
 
-### Without Fallible
+## Without Fallible
 ```c#
 public int GetValue(int arg)
 {
@@ -35,7 +35,8 @@ catch (Exception ex)
 }
 // continue with result
 ```
-### With Fallible
+## With Fallible
+
 ```c#
 public Fallible<int> GetValue(int arg)
 {
@@ -54,13 +55,14 @@ if (error)
 // continue with result
 ```
 
-## Usage
+# Usage
 
 The library includes two main types: `Error` and `Fallible<T>`. `Error` is a type that represents an error state while `Fallible<T>` is a type that represents a value that can either be in an error state or a success state.
 
-### `Error`
+## `Error`
 
 `Error` is a reference type and can be created by instantiating it with a message. The message is a string which describes the error.
+
 ```c#
 var error = new Error("Something went wrong");
 ```
@@ -74,7 +76,7 @@ Equality and hash codes for `Error` objects are determined by where in the progr
 
 Although, if the error's message was constructed using dynamic arguments, the errors will not be considered equal if the arguments are different due to the equality check on the message property.
 
-### `Fallible<T>`
+## `Fallible<T>`
 
 `Fallible<T>` is a readonly record struct meaning that it is immutable, is identified by its properties and is allocated on the stack. It can not be created directly. To create a `Fallible<T>` object you can cast either explicitly or implicitly from `T` or `Error`. Using a cast from only these two types as the only way to create a `Fallible<T>` object ensures that we always have either an error or a value.
 
@@ -89,7 +91,7 @@ public Fallible<int> GetValue(int arg)
 }
 ```
 
-#### Returning `void`
+### Returning `void`
 
 Fallible includes a `Void` type that can be used to return *void* from a method. It does not have an accessible constructor and can only be created by using the `Fallible.Return` property.
 
@@ -116,7 +118,7 @@ if (error)
 // continue with result
 ```
 
-#### Implicit Unwrapping
+### Implicit Unwrapping
 
 You may want to use the `Fallible<T>` type in a wrapper function. If the wrapped function also returns a `Fallible<T>` type, an implicit conversion will automatically unwrap `Fallible<Fallible<T>>` into `Fallible<T>`.
 
@@ -162,7 +164,7 @@ Messages can also be appended by putting the string on the right hand side of th
 return error + ": Could not find user";
 ```
 
-#### Error message formatting
+### Error message formatting
 
 To ensure that error messages are not accidentally overwritten, directly setting the `Error.Message` property is not possible. If appending or prepending from the error message is not suitable, you can use the `Error.Format` method to format the message more comprehensively. This method functions exactly like the `string.Format` method and uses that in its implementation.
 
@@ -170,7 +172,7 @@ To ensure that error messages are not accidentally overwritten, directly setting
 return error.Format("Could not find user: {0}: Aborting...", error.Message);
 ```
 
-### Fluent Error Handling
+## Fluent Error Handling
 
 You can use functional chaining to handle errors in a more declarative way. For example, the following code will get the user using the method with the declared signature and pass it into the next method if successful or return an `Error` object if the user is not found:
 
@@ -211,7 +213,7 @@ Simply stated, `Then` and `OnFail` can be chained together as many times as nece
 
 The object returned from the chain will be `Fallible<T>` where `T` is the type of the value returned by the last `Then` expression.
 
-#### Try
+### `Try`
 
 You can use the `Try` static method to wrap a call to a method that returns `Fallible<T>`. You can optionally add an error message as a parameter to the `Try` method. This will be prepend to the error message should the tried expression fail.
 
@@ -223,9 +225,84 @@ var (user, error) = Fallible.Try(() => GetUserFromDB(userId), "Could not find us
 Console.WriteLine(error); // "Could not find user: Database is not connected"
 ```
 
-### Handling Covariance and Contravariance
+## Fluent Logic
 
-#### Covariance
+Fallible offers a fluent API for logic that can be used to handle `Fallible<T>` objects. `If()`, `And()` and `Or()` are all methods that return a `Fallible<T>` object for chaining. These methods are similar to `Try()`, `Then()` and `OnFail()` but they do not pass through values or errors. The latter methods could be used with discarded parameters, but the former methods enhance readability and pair nicely with extracted methods such as the following example.
+
+### `Fallible.If()`
+
+`Fallible.If()` lets you create a `Fallible<Void>` object from an expression. If the expression evaluates to false, the `Fallible<Void>` object will be in a failed state. If the expression evaluates to true, the `Fallible<Void>` object will be in a succeeded state.
+
+```c#
+Fallible.If(variable is null).Then(() => {
+    // Do something
+});
+```
+
+### `Or()`
+
+`Or()` takes a parameterless function returning a `Fallible<T>` object. The function will only be executed if the chain is in a failed state. This method is useful for reverting the state of a failed chain. The main use case for this method is to try a few different fallible operations and either return the first successful operation or finalise with a failed state.
+
+```c#
+var (value, error) = 
+    FirstFallibleOperation.
+    Or(SecondFallibleOperation).
+    Or(ThirdFallibleOperation).
+    OnFail(error => {
+        // Handle error
+    });
+    
+Console.WriteLine(error); // Error from ThirdFallibleOperation
+Console.WriteLine(value); // Value from first successful operation
+```
+
+### `OrIf()`
+
+`OrIf()` is like `Or()` except that it takes an expression argument.
+
+```c#
+Fallible.If(text.Length < 5).OrIf(text.StartsWith("Hello")).Then(() => {
+    // Do something
+});
+```
+
+This method can be used as a shortcut for creating a fallible condition to begin chaining. If the expression does not read easily, it is recommended to extract it into its own method returning `Fallible<Void>`.
+
+*Note: it is not possible to chain `OrIf()` with `Then()` or `And()` as failed chains do not propagate values.*
+
+### `And()`
+
+`And()` is similar to `Then()` except that it accepts a parameterless function returning a `Fallible<T>` object. The function will only be executed if the chain is in a succeeded state.
+
+```c#
+var (value, error) = 
+    FirstFallibleOperation.
+    And(SecondFallibleOperation).
+    And(ThirdFallibleOperation)
+    
+Console.WriteLine(error); // Error from first failed operation
+Console.WriteLine(value); // Value from ThirdFallibleOperation
+```
+
+### `AndIf()`
+
+```c#
+// Provided these two functions
+public Fallible<User> IfUserExists(UserId id) => Fallible.Try(() => GetUserFromDB(id), "Could not find user in database");
+
+public Fallible<Void> UserIsCustomer(User user) => user.Type == UserTypes.Customer;
+
+// You can chain logic fluently
+IfUserExists(userId).AndIf(UserIsCustomer).Then(user => {
+    // Do something with user
+});
+```
+
+*Note: `AndIf()` also accepts a simple expression as an argument. If succeeded, the value will be passed on.*
+
+## Handling Covariance and Contravariance
+
+### Covariance
 
 To convert a `Fallible<T>` to a `Fallible<U>` where `T` is a subtype of `U`, you can use the `ToCovariant` method. This method will return a `Fallible<U>` where the value of `Fallible<U>` is the value of `Fallible<T>` converted to `U`. E.g. `Fallible<List<int>>` to `Fallible<IEnumerable<int>>`.
 
@@ -234,7 +311,7 @@ Fallible<List<int>> fallible = new List<int> { 42 };
 Fallible<IEnumerable<int>> covariant = fallible.ToCovariant<List<int>, IEnumerable<int>>();
 ```
 
-#### Contravariance
+### Contravariance
 
 To convert a `Fallible<U>` to a `Fallible<T>` where `T` is a subtype of `U`, you can use the `ToContravariant` method. This method will return a `Fallible<T>` where the value of `Fallible<T>` is the value of `Fallible<U>` converted to `T`. E.g. `Fallible<IEnumerable<int>>` to `Fallible<List<int>>`.
 

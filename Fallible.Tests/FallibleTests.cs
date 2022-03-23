@@ -412,4 +412,146 @@ public class FallibleTests
     }
 
     #endregion
+
+    #region Logical Chaining
+
+    private Fallible<int> WillFail() => new Error("Failed");
+    private Fallible<int> WillSucceed() => 42;
+    
+    [Fact]
+    public void Or_ChainsFailedFallibles()
+    {
+        const int expectedValue = 2;
+
+        var (value, error) = Fallible.If(WillFail).Or(() => FallibleOperation(expectedValue, false));
+
+        Assert.Equal(expectedValue, value);
+    }
+    
+    [Fact]
+    public void Or_ReturnsFirstSuccessfulFallible()
+    {
+        const int expectedValue = 2;
+
+        var (value, error) = Fallible.If(() => FallibleOperation(expectedValue, false)).Or(() => FallibleOperation(2, true));
+
+        Assert.Equal(expectedValue, value);
+    }
+    
+    [Fact]
+    public void And_ReturnsFirstFailedFallible()
+    {
+        var callCount = 0;
+
+        var (_, error) = Fallible.If(() => FallibleOperation(callCount++, true)).And(() => FallibleOperation(callCount++, false));
+
+        Assert.True(error);
+        Assert.Equal(1, callCount);
+    }
+    
+    [Fact]
+    public void And_ExecutesBothFallibleOperations()
+    {
+        var callCount = 0;
+
+        Fallible.If(() => FallibleOperation(callCount++, false)).And(() => FallibleOperation(callCount++, false));
+
+        Assert.Equal(2, callCount);
+    }
+
+    [Fact]
+    public void And_CanChainDifferentFallibleTypes()
+    {
+        Fallible.If(() => FallibleOperation(2, false)).And(() => FallibleOperation("3", false));
+    }
+    
+    [Fact]
+    public void If_BooleanOverload_ReturnsNoError_WhenTrue()
+    {
+        var (value, error) = Fallible.If(true).Then(() => 42);
+        
+        Assert.Equal(42, value);
+        Assert.False(error);
+    }
+    
+    [Fact]
+    public void If_BooleanOverload_ReturnsError_WhenFalse()
+    {
+        var (_, error) = Fallible.If(false).Then(() => 42);
+        
+        Assert.True(error);
+    }
+    
+    [Fact]
+    public void AndIf_ReturnsNoError_WhenTrue()
+    {
+        const int expectedValue = 42;
+        
+        var (value, error) = Fallible.
+            If(() => FallibleOperation(expectedValue, false)).
+            AndIf(x => x == expectedValue);
+        
+        Assert.Equal(expectedValue, value);
+        Assert.False(error);
+    }
+    
+    [Fact]
+    public void AndIf_ReturnsError_WhenFalse()
+    {
+        var (_, error) = Fallible.
+            If(WillSucceed).
+            AndIf(x => x == x + 2);
+        
+        Assert.True(error);
+    }
+    
+    [Fact]
+    public void AndIf_ReturnsError_WhenChainedOnError()
+    {
+        var (_, error) = Fallible.
+            If(WillFail).
+            AndIf(x => x == x + 2);
+        
+        Assert.True(error);
+    }
+    
+    [Fact]
+    public void OrIf_ReturnsNoError_WhenTrue()
+    {
+        var callCount = 0;
+        
+        var (_, error) = Fallible.
+            If(WillFail).
+            OrIf(true)
+            .Then(_ => callCount++);
+        
+        Assert.Equal(1, callCount);
+        Assert.False(error);
+    }
+    
+    [Fact]
+    public void OrIf_ReturnsError_WhenFalse()
+    {
+        var callCount = 0;
+        
+        var (_, error) = Fallible.
+            If(WillFail).
+            OrIf(false)
+            .Then(_ => callCount++);
+        
+        Assert.Equal(0, callCount);
+        Assert.True(error);
+    }
+    
+    [Fact]
+    public void OrIf_ReturnsError_WhenChainedOnError()
+    {
+        var (_, error) = Fallible.
+            If(WillFail).
+            OrIf(false);
+        
+        Assert.True(error);
+    }
+
+    #endregion
 }
