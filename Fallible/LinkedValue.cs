@@ -21,9 +21,14 @@ public class LinkedValue<TValue, TResult>
         return Link(!InErrorState(), func);
     }
 
-    public Fallible<TFinal> Then<TFinal>(Func<TValue, Fallible<TFinal>> func)
+    public Fallible<TFinal> ContinueWith<TFinal>(Func<TValue, Fallible<TFinal>> func)
     {
         return !FallibleObject.Error ? func(Value) : FallibleObject.Error;
+    }
+    
+    public Fallible<TFinal> Then<TFinal>(Func<TResult, Fallible<TFinal>> func)
+    {
+        return !FallibleObject.Error ? func(FallibleObject.Value) : FallibleObject.Error;
     }
 
     private bool InErrorState()
