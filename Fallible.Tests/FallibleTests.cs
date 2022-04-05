@@ -581,7 +581,7 @@ public class FallibleTests
             .Or(WillSucceed) // Chain exits here
             .Or(WillFail)
             .Or(_ => callCount++) // Should not be called
-            .Then<int>(_ =>
+            .ContinueWith<int>(_ =>
             {
                 callCount++;
                 return callCount;
@@ -601,7 +601,7 @@ public class FallibleTests
             .And(WillFail) // Chain exits here
             .And(WillSucceed)
             .And(_ => callCount++) // Should not be called
-            .Then<int>(_ =>
+            .ContinueWith<int>(_ =>
             {
                 callCount++;
                 return callCount;
@@ -619,7 +619,7 @@ public class FallibleTests
             .If(WillSucceed)
             .And(WillSucceed)
             .And(WillSucceed)
-            .Then<int>(x =>
+            .ContinueWith<int>(x =>
             {
                 callCount++;
                 return callCount;
