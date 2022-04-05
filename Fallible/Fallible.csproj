@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>0.2.4</PackageVersion>
+        <PackageVersion>0.2.5</PackageVersion>
         <Title>Fallible</Title>
         <Authors>Tom van Dinther</Authors>
         <Description>An idiomatic way to explicitly define, propagate and handle error states in C#. This library is inspired by Go's errors.</Description>
