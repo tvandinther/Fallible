@@ -229,6 +229,16 @@ Console.WriteLine(error); // "Could not find user: Database is not connected"
 
 Fallible offers a fluent API for logic that can be used to handle `Fallible<T>` objects. `If()`, `And()` and `Or()` are all methods that return a `Fallible<T>` object for chaining. These methods are similar to `Try()`, `Then()` and `OnFail()` but they do not pass through values or errors. The latter methods could be used with discarded parameters, but the former methods enhance readability and pair nicely with extracted methods such as the following example.
 
+### Value capturing and evaluation
+
+```c#
+Fallible.About(text).If(text => text.Length < 5)
+    .Or(text => text.StartsWith("Hello"))
+    .Then(text => {
+    // Do something with text
+});
+```
+
 ### `Fallible.If()`
 
 `Fallible.If()` lets you create a `Fallible<Void>` object from an expression. If the expression evaluates to false, the `Fallible<Void>` object will be in a failed state. If the expression evaluates to true, the `Fallible<Void>` object will be in a succeeded state.
@@ -239,61 +249,70 @@ Fallible.If(variable is null).Then(() => {
 });
 ```
 
-### `Or()`
+### `OnFail()`
 
-`Or()` takes a parameterless function returning a `Fallible<T>` object. The function will only be executed if the chain is in a failed state. This method is useful for reverting the state of a failed chain. The main use case for this method is to try a few different fallible operations and either return the first successful operation or finalise with a failed state.
+`OnFail()` takes a parameterless function or a function with the error as an argument, returning a `Fallible<T>` object. The function will only be executed if the chain is in a failed state. This method is useful for reverting the state of a failed chain. The main use case for this method is to try a few different fallible operations and either return the first successful operation or finalise with a failed state.
 
 ```c#
 var (value, error) = 
     FirstFallibleOperation.
-    Or(SecondFallibleOperation).
-    Or(ThirdFallibleOperation).
+    OnFail(SecondFallibleOperation).
+    OnFail(ThirdFallibleOperation).
     OnFail(error => {
         // Handle error
     });
+    
+    // or
+    //
+    // OnFail(() => {
+    //     // Handle error
+    // });
     
 Console.WriteLine(error); // Error from ThirdFallibleOperation
 Console.WriteLine(value); // Value from first successful operation
 ```
 
-### `OrIf()`
+### `OnFailIf()`
 
-`OrIf()` is like `Or()` except that it takes an expression argument.
+`OnFailIf()` is like `OnFail()` except that it takes an expression argument.
 
 ```c#
-Fallible.If(text.Length < 5).OrIf(text.StartsWith("Hello")).Then(() => {
+FirstFallibleOperation
+    .OnFailIf(doTheBackupPlanFlag == true)
+    .And(FallibleBackupPlan)
+    .Then(() => {
     // Do something
 });
 ```
 
-This method can be used as a shortcut for creating a fallible condition to begin chaining. If the expression does not read easily, it is recommended to extract it into its own method returning `Fallible<Void>`.
+If the expression does not read easily, it is recommended to extract it into its own method returning `Fallible<Void>`.
 
-*Note: it is not possible to chain `OrIf()` with `Then()` or `And()` as failed chains do not propagate values.*
+*Note: it is not possible to chain `OrIf()` with `Then()` or `And()` as failed chains do not propagate values. Instead use `Fallible.About()` to capture values.*
 
-### `And()`
+### `Then()`
 
-`And()` is similar to `Then()` except that it accepts a parameterless function returning a `Fallible<T>` object. The function will only be executed if the chain is in a succeeded state.
+`Then()` is similar to `Then()` except that it accepts a parameterless function returning a `Fallible<T>` object. The function will only be executed if the chain is in a succeeded state.
 
 ```c#
 var (value, error) = 
     FirstFallibleOperation.
-    And(SecondFallibleOperation).
-    And(ThirdFallibleOperation)
+    Then(SecondFallibleOperation).
+    Then(ThirdFallibleOperation)
     
 Console.WriteLine(error); // Error from first failed operation
 Console.WriteLine(value); // Value from ThirdFallibleOperation
 ```
 
-### `AndIf()`
+### `ThenIf()`
 
 ```c#
 // Provided these two functions
 public Fallible<User> IfUserExists(UserId id) => Fallible.Try(() => GetUserFromDB(id), "Could not find user in database");
 
-public Fallible<Void> UserIsCustomer(User user) => user.Type == UserTypes.Customer;
+public bool UserIsCustomer(User user) => user.Type == UserTypes.Customer;
 
 // You can chain logic fluently
-IfUserExists(userId).AndIf(UserIsCustomer).Then(user => {
+IfUserExists(userId).ThenIf(UserIsCustomer).Then(user => {
     // Do something with user
 });
 ```

@@ -279,10 +279,12 @@ public class FallibleTests
     public void OnFail_ReturnsPassesThroughFallible_WhenOperationSucceeds_TransparentOnFail()
     {
         const int expectedValue = 42;
+        var callCount = 0;
         
         var result = Fallible.Try(() => FallibleOperation(expectedValue, false))
-            .OnFail(_ => {});
+            .OnFail(() => callCount++);
         
+        Assert.Equal(0, callCount);
         Assert.Equal(expectedValue, result.Value);
     }
     
@@ -300,9 +302,12 @@ public class FallibleTests
     [Fact]
     public void OnFail_ReturnsPassesThroughFallible_WhenOperationFails_TransparentOnFail()
     {
-        var result = Fallible.Try(() => FallibleOperation(42, true))
-            .OnFail(_ => { });
+        var callCount = 0;
         
+        var result = Fallible.Try(() => FallibleOperation(42, true))
+            .OnFail(() => callCount++);
+        
+        Assert.Equal(1, callCount);
         Assert.NotNull(result.Error);
     }
     
@@ -328,8 +333,12 @@ public class FallibleTests
     [Fact]
     public void OnFail_ReturnsError_WhenOperationFails_TransparentOnFail()
     {
-        var (_, error) = Fallible.Try(() => FallibleOperation(42, true)).OnFail(_ => { });
+        var callCount = 0;
         
+        var (_, error) = Fallible.Try(() => FallibleOperation(42, true))
+            .OnFail(() => callCount++);
+        
+        Assert.Equal(1, callCount);
         Assert.NotNull(error);
     }
 
@@ -367,13 +376,13 @@ public class FallibleTests
     }
     
     [Fact]
-    public void CanChainNested_WhenOnFail()
+    public void CanChainNested_WhenRecovered()
     {
         const int expectedValue = 42;
         
         var (result, _) = FallibleOperation(0, true)
             .Then(value => value + 1)
-            .OnFail(_ => 
+            .Recover(_ => 
                 FallibleOperation(expectedValue, false)
                     .Then(_ => expectedValue + 1)
                     .OnFail(error => "Could not get players: " + error));
@@ -419,11 +428,12 @@ public class FallibleTests
     private Fallible<int> WillSucceed() => 42;
     
     [Fact]
-    public void Or_ChainsFailedFallibles()
+    public void Recover_ChainsFailedFallibles()
     {
         const int expectedValue = 2;
 
-        var (value, error) = Fallible.If(WillFail).Or(() => FallibleOperation(expectedValue, false));
+        var (value, error) = Fallible.If(WillFail)
+            .Recover(() => FallibleOperation(expectedValue, false));
 
         Assert.Equal(expectedValue, value);
     }
@@ -433,7 +443,7 @@ public class FallibleTests
     {
         const int expectedValue = 2;
 
-        var (value, error) = Fallible.If(() => FallibleOperation(expectedValue, false)).Or(() => FallibleOperation(2, true));
+        var (value, error) = Fallible.If(() => FallibleOperation(expectedValue, false)).OnFail(() => FallibleOperation(2, true));
 
         Assert.Equal(expectedValue, value);
     }
@@ -443,7 +453,7 @@ public class FallibleTests
     {
         var callCount = 0;
 
-        var (_, error) = Fallible.If(() => FallibleOperation(callCount++, true)).And(() => FallibleOperation(callCount++, false));
+        var (_, error) = Fallible.If(() => FallibleOperation(callCount++, true)).Then(() => FallibleOperation(callCount++, false));
 
         Assert.True(error);
         Assert.Equal(1, callCount);
@@ -454,7 +464,7 @@ public class FallibleTests
     {
         var callCount = 0;
 
-        Fallible.If(() => FallibleOperation(callCount++, false)).And(() => FallibleOperation(callCount++, false));
+        Fallible.If(() => FallibleOperation(callCount++, false)).Then(() => FallibleOperation(callCount++, false));
 
         Assert.Equal(2, callCount);
     }
@@ -462,7 +472,7 @@ public class FallibleTests
     [Fact]
     public void And_CanChainDifferentFallibleTypes()
     {
-        Fallible.If(() => FallibleOperation(2, false)).And(() => FallibleOperation("3", false));
+        Fallible.If(() => FallibleOperation(2, false)).Then(() => FallibleOperation("3", false));
     }
     
     [Fact]
@@ -489,7 +499,7 @@ public class FallibleTests
         
         var (value, error) = Fallible.
             If(() => FallibleOperation(expectedValue, false)).
-            AndIf(x => x == expectedValue);
+            ThenIf(x => x == expectedValue);
         
         Assert.Equal(expectedValue, value);
         Assert.False(error);
@@ -500,7 +510,7 @@ public class FallibleTests
     {
         var (_, error) = Fallible.
             If(WillSucceed).
-            AndIf(x => x == x + 2);
+            ThenIf(x => x == x + 2);
         
         Assert.True(error);
     }
@@ -510,7 +520,7 @@ public class FallibleTests
     {
         var (_, error) = Fallible.
             If(WillFail).
-            AndIf(x => x == x + 2);
+            ThenIf(x => x == x + 2);
         
         Assert.True(error);
     }
@@ -522,7 +532,7 @@ public class FallibleTests
         
         var (_, error) = Fallible.
             If(WillFail).
-            OrIf(true)
+            OnFailIf(true)
             .Then(_ => callCount++);
         
         Assert.Equal(1, callCount);
@@ -536,7 +546,7 @@ public class FallibleTests
         
         var (_, error) = Fallible.
             If(WillFail).
-            OrIf(false)
+            OnFailIf(false)
             .Then(_ => callCount++);
         
         Assert.Equal(0, callCount);
@@ -548,10 +558,77 @@ public class FallibleTests
     {
         var (_, error) = Fallible.
             If(WillFail).
-            OrIf(false);
+            OnFailIf(false);
         
         Assert.True(error);
     }
 
+    #endregion
+
+    #region New Logical Chaining
+
+    private Fallible<int> WillFail(int x) => new Error("Failed");
+    private Fallible<int> WillSucceed(int x) => x;
+    
+    [Fact]
+    public void CanCaptureValue_AndLinkFalliblesLogically_UsingOr()
+    {
+        var callCount = 0;
+        
+        var (result, error) = Fallible.About(42)
+            .If(WillFail)
+            .Or(WillFail)
+            .Or(WillSucceed) // Chain exits here
+            .Or(WillFail)
+            .Or(_ => callCount++) // Should not be called
+            .Then<int>(_ =>
+            {
+                callCount++;
+                return callCount;
+            });
+        
+        Assert.Equal(1, result);
+    }
+    
+    [Fact]
+    public void CanCaptureValue_AndLinkFalliblesLogically_UsingAndFails()
+    {
+        var callCount = 0;
+        
+        var (result, error) = Fallible.About(42)
+            .If(WillSucceed)
+            .And(WillSucceed)
+            .And(WillFail) // Chain exits here
+            .And(WillSucceed)
+            .And(_ => callCount++) // Should not be called
+            .Then<int>(_ =>
+            {
+                callCount++;
+                return callCount;
+            });
+        
+        Assert.Equal(0, result);
+    }
+    
+    [Fact]
+    public void CanCaptureValue_AndLinkFalliblesLogically_UsingAndSucceeds()
+    {
+        var callCount = 0;
+
+        var (result, error) = Fallible.About(42)
+            .If(WillSucceed)
+            .And(WillSucceed)
+            .And(WillSucceed)
+            .Then<int>(x =>
+            {
+                callCount++;
+                return callCount;
+            });
+        
+        Assert.Equal(1, result);
+    }
+    
+    private Fallible<string> MakeString(int x) => x.ToString();
+    
     #endregion
 }
