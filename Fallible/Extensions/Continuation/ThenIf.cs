@@ -1,8 +1,8 @@
 using System.Runtime.CompilerServices;
 
-namespace FallibleTypes;
+namespace FallibleTypes.Extensions.Continuation;
 
-public static partial class Fallible
+public static partial class FallibleExtensions
 {
     /// <summary>
     /// Will evaluate the expression if the chain is in a succeeded state.
@@ -29,17 +29,11 @@ public static partial class Fallible
     /// <remarks>Receives the value from the chain.</remarks>
     public static Fallible<T> ThenIf<T>(this Fallible<T> fallible, Func<T, bool> expressionFunc, [CallerArgumentExpression("expressionFunc")] string callerExpression = "")
     {
-        var (value, error) = fallible;
-        if (error) return error;
-        
-        return expressionFunc(value) ? fallible : new Error($"{callerExpression} was false");
+        return ThenIf(fallible, expressionFunc(fallible.Value), callerExpression);
     }
     
     public static Fallible<T> ThenIf<T>(this Fallible<T> fallible, Func<bool> expressionFunc, [CallerArgumentExpression("expressionFunc")] string callerExpression = "")
     {
-        var (_, error) = fallible;
-        if (error) return error;
-        
-        return expressionFunc() ? fallible : new Error($"{callerExpression} was false");
+        return ThenIf(fallible, expressionFunc(), callerExpression);
     }
 }

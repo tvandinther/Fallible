@@ -4,11 +4,17 @@ public class LinkedValue<TValue, TResult>
 {
     private TValue Value { get; }
     private Fallible<TResult> FallibleObject { get; }
-    
+
     public LinkedValue(TValue value, Fallible<TResult> fallibleObject)
     {
         Value = value;
         FallibleObject = fallibleObject;
+    }
+
+    protected LinkedValue(LinkedValue<TValue, TResult> linkedValue)
+    {
+        Value = linkedValue.Value;
+        FallibleObject = linkedValue.FallibleObject;
     }
 
     public LinkedValue<TValue, TResult> Or(Func<TValue, Fallible<TResult>> func)
@@ -26,9 +32,22 @@ public class LinkedValue<TValue, TResult>
         return !FallibleObject.Error ? func(Value) : FallibleObject.Error;
     }
     
-    public Fallible<TFinal> Then<TFinal>(Func<TResult, Fallible<TFinal>> func)
+    public FinalLinkedValue<TValue, TResult, TFinal> Then<TFinal>(Func<TValue, Fallible<TFinal>> func)
+    {
+        if (!InErrorState())
+            return new FinalLinkedValue<TValue, TResult, TFinal>(this, func(Value));
+
+        return new FinalLinkedValue<TValue, TResult, TFinal>(this, FallibleObject.Error);
+    }
+    
+    public Fallible<TFinal> ThenFinalise<TFinal>(Func<TResult, Fallible<TFinal>> func)
     {
         return !FallibleObject.Error ? func(FallibleObject.Value) : FallibleObject.Error;
+    }
+    
+    public Fallible<TFinal> ThenFinalise<TFinal>(Func<TValue, TFinal> func)
+    {
+        return !FallibleObject.Error ? func(Value) : FallibleObject.Error;
     }
 
     private bool InErrorState()

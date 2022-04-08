@@ -1,6 +1,6 @@
-namespace FallibleTypes;
+namespace FallibleTypes.Extensions.Continuation;
 
-public static partial class Fallible
+public static partial class FallibleExtensions
 {
     /// <summary>
     /// Allows for chaining of non-fallible operations.

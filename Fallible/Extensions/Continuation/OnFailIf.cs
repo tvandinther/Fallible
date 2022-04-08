@@ -1,8 +1,8 @@
 using System.Runtime.CompilerServices;
 
-namespace FallibleTypes;
+namespace FallibleTypes.Extensions.Continuation;
 
-public static partial class Fallible
+public static partial class FallibleExtensions
 {
     /// <summary>
     /// Will evaluate the expression if the chain is in a failed state.
@@ -22,19 +22,6 @@ public static partial class Fallible
     
     public static Fallible<T> OnFailIf<T>(this Fallible<T> fallible, Func<bool> expression, [CallerArgumentExpression("expression")] string callerExpression = "")
     {
-        var (value, error) = fallible;
-
-        if (error) return expression() ? value : new Error($"{callerExpression} was false");
-        
-        return fallible;
-    }
-    
-    public static Fallible<T> OnFailIf<T>(this Fallible<T> fallible, Func<T, bool> expression, [CallerArgumentExpression("expression")] string callerExpression = "")
-    {
-        var (value, error) = fallible;
-
-        if (error) return expression(value) ? value : new Error($"{callerExpression} was false");
-        
-        return fallible;
+        return OnFailIf(fallible, expression(), callerExpression);
     }
 }
