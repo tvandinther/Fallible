@@ -1,4 +1,4 @@
-﻿﻿# Fallible
+﻿# Fallible
 
 [![Tests](https://github.com/tvandinther/fallible/actions/workflows/test.yml/badge.svg)](https://www.github.com/tvandinther/fallible)
 [![Nuget](https://img.shields.io/nuget/v/Fallible?color=blue)](https://www.nuget.org/packages/Fallible/)
@@ -9,6 +9,8 @@
 **Author: Tom van Dinther**
 
 An idiomatic way to explicitly define, propagate and handle error states in C#. This library is inspired by Go's [errors](https://gobyexample.com/errors).
+
+*`Fallible<T>` is a functor. It has a "return" and a "bind" `Fallible.Map()`/`ToFallible()` extension method to bring values and functions into the fallible world.*
 
 The purpose of this library is to support the usage of a new pattern of error propagation in C#. Instead of throwing exceptions and implicitly requiring callers to catch them, the pattern used in this library explicitly defines possibilities of error states in the return type and expects them to the caller to consciously address it.
 

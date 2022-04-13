@@ -1,13 +1,21 @@
 ﻿namespace FallibleTypes;
 
-public class FinalLinkedValue<TValue, TResult, TFinal> : LinkedValue<TValue, TResult>
+public class FinalLinkedValue<TValue, TFinal> : LinkedValue<TValue>
 {
-    private LinkedValue<TValue, TResult> _linkedValue;
+    private LinkedValue<TValue> _linkedValue;
     private Fallible<TFinal> _final;
     
-    internal FinalLinkedValue(LinkedValue<TValue, TResult> linkedValue, Fallible<TFinal> final) : base(linkedValue)
+    internal FinalLinkedValue(LinkedValue<TValue> linkedValue, Fallible<TFinal> final) : base(linkedValue)
     {
         _linkedValue = linkedValue;
         _final = final;
+    }
+    
+    public Fallible<TNew> ThenFinally<TNew>(Func<TFinal, Fallible<TNew>> func)
+    {
+        if (!_final.Error) return func(_final.Value);
+
+        // return _linkedValue.FallibleObject.Error;
+        return _final.Error;
     }
 }

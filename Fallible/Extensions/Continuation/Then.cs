@@ -29,8 +29,8 @@ public static partial class FallibleExtensions
     }
 
     /// <inheritdoc cref="Then{TResult}"/>
-    /// <typeparam name="TIn">The type of the fallible being chained.</typeparam>
-    public static Fallible<TResult> Then<TIn, TResult>(this Fallible<TIn> fallible, Func<TIn, TResult> then)
+    /// <typeparam name="TValue">The type of the fallible being chained.</typeparam>
+    public static Fallible<TResult> Then<TValue, TResult>(this Fallible<TValue> fallible, Func<TValue, TResult> then)
     {
         return Then(fallible, () => then(fallible.Value));
     }

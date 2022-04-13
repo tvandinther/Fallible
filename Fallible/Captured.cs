@@ -9,10 +9,10 @@ public class Captured<TValue>
         _value = value;
     }
 
-    public LinkedValue<TValue, TResult> If<TResult>(Func<TValue, Fallible<TResult>> func)
+    public LinkedValue<TValue> If(Func<TValue, Fallible<Void>> func)
     {
         var fallible = func(_value);
 
-        return new LinkedValue<TValue, TResult>(_value, fallible);
+        return new LinkedValue<TValue>(_value, fallible);
     }
 }

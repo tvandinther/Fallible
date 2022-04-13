@@ -1,6 +1,4 @@
-﻿using Fallible.Extensions;
-using Fallible.Extensions.Continuation;
-using FallibleTypes.Extensions;
+﻿using FallibleTypes.Extensions.Continuation;
 using Xunit;
 
 namespace FallibleTypes.Tests.Extensions;

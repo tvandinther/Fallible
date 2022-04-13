@@ -1,28 +1,28 @@
 namespace FallibleTypes;
 
-public class LinkedValue<TValue, TResult>
+public class LinkedValue<TValue>
 {
-    private TValue Value { get; }
-    private Fallible<TResult> FallibleObject { get; }
+    internal TValue Value { get; }
+    internal Fallible<Void> FallibleObject { get; }
 
-    public LinkedValue(TValue value, Fallible<TResult> fallibleObject)
+    public LinkedValue(TValue value, Fallible<Void> fallibleObject)
     {
         Value = value;
         FallibleObject = fallibleObject;
     }
 
-    protected LinkedValue(LinkedValue<TValue, TResult> linkedValue)
+    protected LinkedValue(LinkedValue<TValue> linkedValue)
     {
         Value = linkedValue.Value;
         FallibleObject = linkedValue.FallibleObject;
     }
 
-    public LinkedValue<TValue, TResult> Or(Func<TValue, Fallible<TResult>> func)
+    public LinkedValue<TValue> Or(Func<TValue, Fallible<Void>> func)
     {
         return Link(InErrorState(), func);
     }
 
-    public LinkedValue<TValue, TResult> And(Func<TValue, Fallible<TResult>> func)
+    public LinkedValue<TValue> And(Func<TValue, Fallible<Void>> func)
     {
         return Link(!InErrorState(), func);
     }
@@ -32,31 +32,34 @@ public class LinkedValue<TValue, TResult>
         return !FallibleObject.Error ? func(Value) : FallibleObject.Error;
     }
     
-    public FinalLinkedValue<TValue, TResult, TFinal> Then<TFinal>(Func<TValue, Fallible<TFinal>> func)
+    public FinalLinkedValue<TValue, TFinal> Then<TFinal>(Func<TValue, TFinal> func)
     {
         if (!InErrorState())
-            return new FinalLinkedValue<TValue, TResult, TFinal>(this, func(Value));
+        {
+            // func(Value);
+            return new FinalLinkedValue<TValue, TFinal>(this, func(Value));
+        }
 
-        return new FinalLinkedValue<TValue, TResult, TFinal>(this, FallibleObject.Error);
+        return new FinalLinkedValue<TValue, TFinal>(this, FallibleObject.Error);
     }
     
-    public Fallible<TFinal> ThenFinalise<TFinal>(Func<TResult, Fallible<TFinal>> func)
-    {
-        return !FallibleObject.Error ? func(FallibleObject.Value) : FallibleObject.Error;
-    }
-    
-    public Fallible<TFinal> ThenFinalise<TFinal>(Func<TValue, TFinal> func)
-    {
-        return !FallibleObject.Error ? func(Value) : FallibleObject.Error;
-    }
+    // public Fallible<TFinal> ThenFinalise<TFinal>(Func<TResult, Fallible<TFinal>> func)
+    // {
+    //     return !FallibleObject.Error ? func(FallibleObject.Value) : FallibleObject.Error;
+    // }
+    //
+    // public Fallible<TFinal> ThenFinalise<TFinal>(Func<TValue, TFinal> func)
+    // {
+    //     return !FallibleObject.Error ? func(Value) : FallibleObject.Error;
+    // }
 
     private bool InErrorState()
     {
         return FallibleObject.Error;
     }
 
-    private LinkedValue<TValue, TResult> Link(bool shouldExecute, Func<TValue, Fallible<TResult>> func)
+    private LinkedValue<TValue> Link(bool shouldExecute, Func<TValue, Fallible<Void>> func)
     {
-        return shouldExecute ? new LinkedValue<TValue, TResult>(Value, func(Value)) : this;
+        return shouldExecute ? new LinkedValue<TValue>(Value, func(Value)) : this;
     }
 }
