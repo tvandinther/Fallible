@@ -1,9 +1,9 @@
 ﻿using FallibleTypes.Extensions.Continuation;
 using Xunit;
 
-namespace FallibleTypes.Tests.Extensions;
+namespace FallibleTypes.Tests.Extensions.Continuation;
 
-public class RecoverTests
+public class OnFailTests
 {
     [Fact]
     public void Test()

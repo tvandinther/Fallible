@@ -1,6 +1,6 @@
 ﻿namespace FallibleTypes.Extensions;
 
-public static class Extensions
+public static class Map
 {
     public static Fallible<T> AsFallible<T>(this T value)
     {

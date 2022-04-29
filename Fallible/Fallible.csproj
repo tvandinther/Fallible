@@ -15,6 +15,7 @@
         <RepositoryUrl>https://github.com/tvandinther/Fallible</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>errors, golang</PackageTags>
+        <RootNamespace>FallibleTypes</RootNamespace>
     </PropertyGroup>
 
 </Project>
