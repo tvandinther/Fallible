@@ -10,6 +10,8 @@ public class OnFailTests
     {
         Fallible<int> fallible = new Error("Test");
         
+        
+        
         var y = fallible.OnFail(x => x);
     }
 }

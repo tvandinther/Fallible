@@ -5,7 +5,7 @@ namespace FallibleTypes;
 /// <summary>
 /// Utility class for working with Fallible types.
 /// </summary>
-public static partial class Fallible
+public static class Fallible
 {
     /// <summary>
     /// Returns a fallible <see cref="Void"/> instance.
@@ -45,7 +45,7 @@ public static partial class Fallible
     {
         var (value, error) = @try();
         if (error) return errorMessage + error;
-
+        
         return value;
     }
 
@@ -67,24 +67,4 @@ public static partial class Fallible
     {
         return expression ? Return : new Error($"{callerExpression} was false");
     }
-
-    #region Covariance and Contravariance
-
-    public static Fallible<TCovariant> ToCovariant<T, TCovariant>(this Fallible<T> fallible)
-        where T : TCovariant
-    {
-        var (value, error) = fallible;
-        
-        return error ? error : value;
-    }
-
-    public static Fallible<TContravariant> ToContravariant<T, TContravariant>(this Fallible<T> fallible)
-        where TContravariant : T
-    {
-        var (value, error) = fallible;
-
-        return error ? error : (TContravariant) value!;
-    }
-
-    #endregion
 }
