@@ -13,8 +13,6 @@ public static partial class Fallible
     /// <remarks>This is the only way to instantiate <see cref="Void"/>.</remarks>
     public static Fallible<Void> Return => new Void();
 
-    public static Captured<T> About<T>(T value) => new(value);
-    
     /// <summary>
     /// Will execute an operation and try to catch any exceptions and returning an error if caught.
     /// </summary>
