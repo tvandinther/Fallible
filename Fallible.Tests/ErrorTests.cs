@@ -38,7 +38,7 @@ public class ErrorTests
     }
     
     [Fact]
-    public void WhenNull_BoolConversion_ShouldReturnFalse()
+    public void WhenDefault_BoolConversion_ShouldReturnFalse()
     {
         Error error = default!;
         
@@ -47,7 +47,7 @@ public class ErrorTests
 
     #endregion
 
-    #region Equability Tests
+    #region Equality Tests
 
     [Fact]
     public void WhenEquated_GivenSameInstance_ShouldReturnTrue()
@@ -105,9 +105,9 @@ public class ErrorTests
     [Fact]
     public void WhenEquated_GivenSameLocationOfInstantiation_ShouldReturnTrue()
     {
-        var createError = () => new Error("Test");
-        var error1 = createError();
-        var error2 = createError();
+        Error CreateError() => new Error("Test");
+        var error1 = CreateError();
+        var error2 = CreateError();
         
         var result = error1.Equals(error2);
         
