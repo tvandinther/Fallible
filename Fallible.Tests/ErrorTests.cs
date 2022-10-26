@@ -1,42 +1,34 @@
-﻿using Xunit;
+﻿using FsCheck;
+using FsCheck.Xunit;
+using Xunit;
 
 namespace FallibleTypes.Tests;
 
 public class ErrorTests
 {
-    #region Instantiation Tests
-
-    [Fact]
-    public void WhenCreated_ShouldHaveMessage()
+    public ErrorTests()
     {
-        const string expected = "Test";
-        var error = new Error(expected);
-
-        Assert.Equal(expected, error.Message);
+        Arb.Register<Generators>();
     }
     
-    [Fact]
-    public void WhenCreated_ShouldHaveStackTrace()
-    {
-        var expectedStackTraceSubstring = "at FallibleTypes.Error..ctor";
-        
-        var error = new Error("Test");
+    #region Instantiation Tests
 
-        Assert.Contains(expectedStackTraceSubstring, error.StackTrace);
-    }
+    [Property]
+    public Property WhenCreated_ShouldHaveMessage(string message) =>
+        (new Error(message).Message == message).ToProperty();
+    
+    [Property]
+    public Property WhenCreated_ShouldHaveStackTrace(Error error) =>
+        error.StackTrace.Contains("at FallibleTypes.Error..ctor").ToProperty();
     
     #endregion
 
     #region Conversion Tests
 
-    [Fact]
-    public void WhenCreated_BoolConversion_ShouldReturnTrue()
-    {
-        var error = new Error("Test");
-        
-        Assert.True(error);
-    }
-    
+    [Property]
+    public Property WhenCreated_BoolConversion_ShouldReturnTrue(Error error) =>
+        ((bool) error).ToProperty();
+
     [Fact]
     public void WhenDefault_BoolConversion_ShouldReturnFalse()
     {
@@ -49,50 +41,24 @@ public class ErrorTests
 
     #region Equality Tests
 
-    [Fact]
-    public void WhenEquated_GivenSameInstance_ShouldReturnTrue()
-    {
-        var error = new Error("Test");
-        var sameError = error;
+    [Property]
+    public Property WhenEquated_GivenSameInstance_ShouldReturnTrue(Error error) =>
+        error.Equals(error).ToProperty();
 
-        var result = error.Equals(sameError);
-        
-        Assert.True(result);
-    }
-    
-    [Fact]
-    public void WhenEquated_GivenDifferentInstances_ShouldReturnFalse()
-    {
-        var error = new Error("Test");
-        var differentError = new Error("Different");
-        
-        var result = error.Equals(differentError);
-        
-        Assert.False(result);
-    }
-    
-    [Fact]
-    public void WhenEquated_GivenNull_ShouldReturnFalse()
-    {
-        var error = new Error("Test");
-        
-        var result = error.Equals(null!);
-        
-        Assert.False(result);
-    }
-    
-    [Fact]
-    public void WhenEquated_GivenDifferentType_ShouldReturnFalse()
-    {
-        var error = new Error("Test");
-        
-        var result = error.Equals(new object());
-        
-        Assert.False(result);
-    }
+    [Property]
+    public Property WhenEquated_GivenDifferentInstances_ShouldReturnFalse(Error error1, Error error2) => 
+        (!error1.Equals(error2)).When(error1.Message != error2.Message);
+
+    [Property]
+    public Property WhenEquated_GivenNull_ShouldReturnFalse(Error error) =>
+        (!error.Equals(null)).ToProperty();
+
+    [Property]
+    public Property WhenEquated_GivenDifferentType_ShouldReturnFalse(Error error, object obj) =>
+        (!error.Equals(obj)).When(obj is not Error);
 
     [Fact]
-    public void WhenEquated_GivenSameValues_ShouldReturnFalse()
+    public void WhenEquated_GivenSameMessages_DifferentLocationOfLocation_ShouldReturnFalse()
     {
         var error = new Error("Test");
         var sameError = new Error("Test");
@@ -105,7 +71,7 @@ public class ErrorTests
     [Fact]
     public void WhenEquated_GivenSameLocationOfInstantiation_ShouldReturnTrue()
     {
-        Error CreateError() => new Error("Test");
+        Error CreateError() => new("Test");
         var error1 = CreateError();
         var error2 = CreateError();
         
@@ -118,34 +84,20 @@ public class ErrorTests
 
     #region ToString Tests
 
-    [Fact]
-    public void ToString_ContainsMessage()
-    {
-        var expectedSubstring = "Test";
-        var error = new Error(expectedSubstring);
-        
-        var result = error.ToString();
-        
-        Assert.Contains(expectedSubstring, result);
-    }
-    
-    [Fact]
-    public void ToString_ContainsStackTrace()
-    {
-        var expectedSubstring = "at FallibleTypes.Error..ctor";
-        var error = new Error("Test");
-        
-        var result = error.ToString();
-        
-        Assert.Contains(expectedSubstring, result);
-    }
+    [Property]
+    public Property ToString_ContainsMessage(Error error) => 
+        error.ToString().Contains(error.Message).ToProperty();
+
+    [Property]
+    public Property ToString_ContainsStackTrace(Error error) => 
+        error.ToString().Contains("at FallibleTypes.Error..ctor").ToProperty();
 
     #endregion
 
     #region Message Tests
 
     [Fact]
-    public void Format_CorrectlyFormatsMessage()
+    public void Format_FormatsMessageUsingStringFormat()
     {
         const string expected = "test :test: test";
         var error = new Error("test");
@@ -154,28 +106,28 @@ public class ErrorTests
         
         Assert.Equal(expected, error.Message);
     }
-    
-    [Fact]
-    public void AdditionOperator_CorrectlyPrependsString_WhenStringOnLHS()
+
+    [Property]
+    public Property AdditionOperator_DoesNotChangeExistingMessage_WhenStringOnLHS(Error error)
     {
-        const string expected = "test: appended";
-        var error = new Error("test");
-        
-        error += ": appended";
-        
-        Assert.Equal(expected, error.Message);
+        var originalMessage = error.Message;
+        return ("" + error).Message.Equals(originalMessage).ToProperty();
+    }
+    
+    [Property]
+    public Property AdditionOperator_DoesNotChangeExistingMessage_WhenStringOnRHS(Error error)
+    {
+        var originalMessage = error.Message;
+        return (error + "").Message.Equals(originalMessage).ToProperty();
     }
 
-    [Fact]
-    public void AdditionOperator_CorrectlyAppendsString_WhenStringOnRHS()
-    {
-        const string expected = "prepended: test";
-        var error = new Error("test");
-        
-        error = "prepended: " + error;
-        
-        Assert.Equal(expected, error.Message);
-    }
+    [Property]
+    public Property AdditionOperator_PrependsString_WhenStringOnLHS(NonNull<string> message, Error error) =>
+        (message.Get + error).Message.StartsWith(message.Get).ToProperty();
+
+    [Property]
+    public Property AdditionOperator_AppendsString_WhenStringOnRHS(NonNull<string> message, Error error) =>
+        (error + message.Get).Message.EndsWith(message.Get).ToProperty();
 
     #endregion
 }

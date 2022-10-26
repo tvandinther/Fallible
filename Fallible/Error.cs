@@ -27,7 +27,7 @@ public class Error : IEquatable<Error>
     /// Initializes a new instance of the <see cref="Error"/> class.
     /// </summary>
     /// <param name="message">A user-friendly error message.</param>
-    public Error(string message, [CallerFilePath] string callingFilePath = "",
+    public Error(string message = "", [CallerFilePath] string callingFilePath = "",
         [CallerMemberName] string callingMemberName = "", [CallerLineNumber] int callingSourceLineNumber = 0)
     {
         Message = message;
