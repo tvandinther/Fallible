@@ -91,8 +91,6 @@ public class Error : IEquatable<Error>
             && Message == other.Message
             && _callingMemberName == other._callingMemberName
             && _callingFilePath == other._callingFilePath;
-
-
     }
 
     /// <inheritdoc cref="Equals(FallibleTypes.Error?)"/>
