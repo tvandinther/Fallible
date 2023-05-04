@@ -6,7 +6,7 @@
 
         <IsPackable>false</IsPackable>
 
-        <RootNamespace>FallibleTypes.Tests</RootNamespace>
+        <RootNamespace>Valuable.Fallible.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

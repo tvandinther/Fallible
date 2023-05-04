@@ -1,8 +1,7 @@
 using FsCheck;
 using FsCheck.Xunit;
-using Xunit;
 
-namespace FallibleTypes.Tests;
+namespace Valuable.Fallible.Tests;
 
 public class FallibleTests
 {

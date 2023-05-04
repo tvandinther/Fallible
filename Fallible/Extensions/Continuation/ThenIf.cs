@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace FallibleTypes.Extensions.Continuation;
+namespace Valuable.Fallible.Extensions.Continuation;
 
 public static partial class FallibleExtensions
 {

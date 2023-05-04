@@ -1,4 +1,4 @@
-﻿namespace FallibleTypes.Tests.Extensions.Continuation;
+﻿namespace Valuable.Fallible.Tests.Extensions.Continuation;
 
 public class OnFailIfTests
 {

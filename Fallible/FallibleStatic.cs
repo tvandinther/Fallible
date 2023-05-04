@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace FallibleTypes;
+namespace Valuable.Fallible;
 
 /// <summary>
 /// Utility class for working with Fallible types.

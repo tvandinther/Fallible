@@ -1,8 +1,6 @@
 ﻿using System.Collections;
-using System.Runtime.CompilerServices;
-using System.Text;
 
-namespace FallibleTypes;
+namespace Valuable.Fallible;
 
 /// <summary>
 /// A record struct that represents a return type with a possible failure state.

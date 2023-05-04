@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace FallibleTypes;
+namespace Valuable.Fallible;
 
 
 /// <summary>
@@ -93,7 +93,7 @@ public class Error : IEquatable<Error>
             && _callingFilePath == other._callingFilePath;
     }
 
-    /// <inheritdoc cref="Equals(FallibleTypes.Error?)"/>
+    /// <inheritdoc cref="Equals(Valuable.Fallible.Error?)"/>
     public override bool Equals(object? obj)
     {
         if (ReferenceEquals(null, obj)) return false;

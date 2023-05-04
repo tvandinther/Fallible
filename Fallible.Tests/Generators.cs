@@ -1,6 +1,6 @@
 using FsCheck;
 
-namespace FallibleTypes.Tests;
+namespace Valuable.Fallible.Tests;
 
 internal class Generators
 {

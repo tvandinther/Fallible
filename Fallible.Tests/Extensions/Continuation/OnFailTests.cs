@@ -1,7 +1,7 @@
-﻿using FallibleTypes.Extensions.Continuation;
+﻿using Valuable.Fallible.Extensions.Continuation;
 using Xunit;
 
-namespace FallibleTypes.Tests.Extensions.Continuation;
+namespace Valuable.Fallible.Tests.Extensions.Continuation;
 
 public class OnFailTests
 {

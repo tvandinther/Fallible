@@ -1,4 +1,4 @@
-﻿namespace FallibleTypes.Extensions;
+﻿namespace Valuable.Fallible.Extensions;
 
 public static class Map
 {
